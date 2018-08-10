@@ -5,28 +5,10 @@ package Carp::Always::DieOnly;
 
 use 5.006;
 
-use Carp ();
+use Carp::Always 0.15 ();
+BEGIN { our @ISA = qw(Carp::Always) }
 
-sub _die {
-    die @_ if ref($_[0]);
-    if ($_[-1] =~ /\n$/s) {
-        my $arg = pop @_;
-        $arg =~ s/(.*)( at .*? line .*?\n$)/$1/s;
-        push @_, $arg;
-    }
-    die &Carp::longmess;
-}
-
-my %OLD_SIG;
-
-BEGIN {
-  @OLD_SIG{qw(__DIE__)} = @SIG{qw(__DIE__)};
-  $SIG{__DIE__} = \&_die;
-}
-
-END {
-  @SIG{qw(__DIE__)} = @OLD_SIG{qw(__DIE__)};
-}
+sub _warn { warn @_ }
 
 1;
 # ABSTRACT: Like Carp::Always, but only print stacktrace on die()
